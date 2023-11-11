@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Expense {
+    char date[20];
+    int id;
+    char description[100];
+    double amount;
+};
+
+struct ExpenseStack {
+    struct Expense data[100];
+    int top;
+};
+
+void initializeStack(struct ExpenseStack *stack) {
+    stack->top = -1;
+}
+
+void push(struct ExpenseStack *stack, struct Expense expense) {
+    if (stack->top < 99) {
+        stack->data[++stack->top] = expense;
+    } else {
+        printf("Stack is full. Cannot add more expenses.\n");
+    }
+}
+
+struct Expense pop(struct ExpenseStack *stack) {
+    if (stack->top >= 0) {
+        return stack->data[stack->top--];
+    } else {
+        struct Expense emptyExpense = {"", 0, "", 0.0};
+        return emptyExpense;
+    }
+}
+
+void displayTable(struct ExpenseStack *stack) {
+    printf("-------------------------------------------------------------------------\n");
+    printf("| Date       | Expense ID | Description                         | Amount |\n");
+    printf("-------------------------------------------------------------------------\n");
+
+    for (int i = stack->top; i >= 0; i--) {
+        struct Expense expense = stack->data[i];
+        printf("| %-10s | %-9d | %-35s | $%.2lf |\n", expense.date, expense.id, expense.description, expense.amount);
+    }
+
+    printf("-------------------------------------------------------------------------\n");
+}
+
+double calculateTotal(struct ExpenseStack *stack) {
+    double total = 0.0;
+    for (int i = 0; i <= stack->top; i++) {
+        total += stack->data[i].amount;
+    }
+    return total;
+}
+
+int main() {
+    struct ExpenseStack expenseStack;
+    initializeStack(&expenseStack);
+    char choice;
+
+    do {
+        struct Expense newExpense;
+        printf("Enter Date (e.g., 2023-10-28): ");
+        scanf("%s", newExpense.date);
+        printf("Enter Expense ID: ");
+        scanf("%d", &newExpense.id);
+        printf("Enter Expense Description: ");
+        scanf(" %[^\n]s", newExpense.description);
+        printf("Enter Expense Amount: $");
+        scanf("%lf", &newExpense.amount);
+
+        push(&expenseStack, newExpense);
+
+        printf("Do you want to add another expense? (y/n): ");
+        scanf(" %c", &choice);
+    } while (choice == 'y' || choice == 'Y');
+
+    displayTable(&expenseStack);
+    printf("Total amount spent: $%.2lf\n", calculateTotal(&expenseStack));
+
+    return 0;
+}
